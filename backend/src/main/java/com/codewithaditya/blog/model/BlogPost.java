@@ -1,4 +1,3 @@
-// BlogPost.java
 package com.codewithaditya.blog.model;
 
 import jakarta.persistence.*;
