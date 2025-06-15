@@ -25,6 +25,10 @@ public class BlogPost {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

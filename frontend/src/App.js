@@ -1,73 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import { fetchPosts, deletePost } from './services/api';
-import BlogPostForm from './components/BlogPostForm';
-import BlogPostList from './components/BlogPostList';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import CreatePost from './pages/CreatePost';
+import PostDetail from './pages/PostDetail';
+import MyBlogs from './pages/MyBlogs';
 import DeleteConfirmation from './components/DeleteConfirmation';
-import { Container, Typography } from '@mui/material';
+
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated, loading } = useAuth();
+    
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    
+    if (!isAuthenticated) {
+        return <Navigate to="/login" />;
+    }
+    
+    return children;
+};
+
+// Public Route component (for login/register when already authenticated)
+const PublicRoute = ({ children }) => {
+    const { isAuthenticated, loading } = useAuth();
+    
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    
+    if (isAuthenticated) {
+        return <Navigate to="/" />;
+    }
+    
+    return children;
+};
+
+function AppRoutes() {
+    return (
+        <div className="App">
+            <Navbar />
+            <Routes>
+                <Route path="/login" element={
+                    <PublicRoute>
+                        <Login />
+                    </PublicRoute>
+                } />
+                <Route path="/register" element={
+                    <PublicRoute>
+                        <Register />
+                    </PublicRoute>
+                } />
+                <Route path="/" element={<Home />} />
+                <Route path="/my-blogs" element={
+                    <ProtectedRoute>
+                        <MyBlogs />
+                    </ProtectedRoute>
+                } />
+                <Route path="/post/:id" element={<PostDetail />} />
+                <Route path="/create" element={
+                    <ProtectedRoute>
+                        <CreatePost />
+                    </ProtectedRoute>
+                } />
+                <Route path="/edit/:id" element={
+                    <ProtectedRoute>
+                        <CreatePost />
+                    </ProtectedRoute>
+                } />
+            </Routes>
+        </div>
+    );
+}
 
 function App() {
-  const [posts, setPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState(null);
-
-  const loadPosts = async () => {
-    try {
-      setIsLoading(false);
-      const { data } = await fetchPosts();
-      setPosts(data);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      console.log('Deleting post with id:', id);
-      if (!id) {
-        console.error('No ID provided for deletion');
-        return;
-      }
-      console.log('Attempting to delete post with id:', id);
-      console.log('id', id);
-      await deletePost(id); // Using the service we created
-      loadPosts(); // Refresh the list
-    } catch (error) {
-      console.error('Failed to delete post:', error);
-    }
-  };
-
-  const handleDeleteClick = (id) => {
-    setDeleteId(id);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (deleteId) {
-      await handleDelete(deleteId);
-      setDeleteId(null);
-    }
-  };
-
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  return (
-    <Container maxWidth="md">
-      <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ mt: 4 }}>
-        Aditya's Blog
-      </Typography>
-      <BlogPostForm onPostCreated={loadPosts} />
-      <BlogPostList
-        posts={posts}
-        isLoading={isLoading}
-        onDelete={handleDelete}
-      />
-
-      
-    </Container>
-  );
+    return (
+        <Router>
+            <AuthProvider>
+                <AppRoutes />
+            </AuthProvider>
+        </Router>
+    );
 }
 
 export default App;

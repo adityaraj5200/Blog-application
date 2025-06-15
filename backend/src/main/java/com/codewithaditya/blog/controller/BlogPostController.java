@@ -1,13 +1,17 @@
 package com.codewithaditya.blog.controller;
 
+import com.codewithaditya.blog.dto.BlogPostDTO;
 import com.codewithaditya.blog.model.BlogPost;
 import com.codewithaditya.blog.service.BlogPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -17,31 +21,54 @@ public class BlogPostController {
     private final BlogPostService blogPostService;
 
     @GetMapping
-    public ResponseEntity<List<BlogPost>> getAllPosts() {
-        System.out.println("Testing by Aditya : BlogPostController.java : getAllPosts() : 1");
-        return ResponseEntity.ok(blogPostService.getAllPosts());
+    public ResponseEntity<List<BlogPostDTO>> getAllPosts() {
+        List<BlogPostDTO> posts = blogPostService.getAllPosts().stream()
+                .map(BlogPostDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BlogPostDTO> getPostById(@PathVariable Long id) {
+        BlogPost post = blogPostService.getPostById(id);
+        if (post == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(BlogPostDTO.fromEntity(post));
     }
 
     @PostMapping
-    public ResponseEntity<BlogPost> createPost(@RequestBody BlogPost blogPost) {
-        System.out.println("Testing by Aditya : BlogPostController.java : createPost() : 1");
+    public ResponseEntity<BlogPostDTO> createPost(@RequestBody BlogPost blogPost) {
+        String username = getCurrentUsername();
+        BlogPost createdPost = blogPostService.createPost(blogPost, username);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(blogPostService.createPost(blogPost));
+                .body(BlogPostDTO.fromEntity(createdPost));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
-        System.out.println("Testing by Aditya : BlogPostController.java : deletePost() : 1");
+        String username = getCurrentUsername();
         try {
-            blogPostService.deletePost(id);
-            System.out.println("Testing by Aditya : BlogPostController.java : deletePost() : 2");
+            blogPostService.deletePost(id, username);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            System.out.println("Testing by Aditya : BlogPostController.java : deletePost() : 3");
+            if (e instanceof org.springframework.security.access.AccessDeniedException) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(e.getMessage());
+            }
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("Post not found with id: " + id);
         }
+    }
+
+    private String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return authentication.getName();
     }
 }
