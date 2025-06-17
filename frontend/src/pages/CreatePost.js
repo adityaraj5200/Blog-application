@@ -9,7 +9,7 @@ const CreatePost = () => {
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         // Redirect if not authenticated

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 
 export default function DeleteConfirmation({ open, onClose, onConfirm }) {

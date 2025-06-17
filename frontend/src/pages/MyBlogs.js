@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Typography, Box } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import BlogPostList from '../components/BlogPostList';
@@ -9,7 +9,7 @@ const MyBlogs = () => {
     const [isLoading, setIsLoading] = useState(true);
     const { user } = useAuth();
 
-    const loadPosts = async () => {
+    const loadPosts = useCallback(async () => {
         try {
             const response = await api.get('/posts');
             // Filter posts to show only the user's posts
@@ -20,11 +20,11 @@ const MyBlogs = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [user?.username]);
 
     useEffect(() => {
         loadPosts();
-    }, [user?.username]); // Reload when username changes
+    }, [loadPosts]);
 
     const handleDelete = async (id) => {
         try {

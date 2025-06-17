@@ -8,7 +8,6 @@ import Home from './pages/Home';
 import CreatePost from './pages/CreatePost';
 import PostDetail from './pages/PostDetail';
 import MyBlogs from './pages/MyBlogs';
-import DeleteConfirmation from './components/DeleteConfirmation';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {

@@ -7,7 +7,6 @@ import api from '../services/axiosConfig';
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
     const { isAuthenticated, user } = useAuth();
 
     const loadPosts = async () => {
@@ -16,8 +15,6 @@ const Home = () => {
             setPosts(response.data);
         } catch (error) {
             console.error('Error loading posts:', error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
