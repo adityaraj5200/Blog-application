@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class BlogPostController {
     private final BlogPostService blogPostService;
