@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -67,7 +69,11 @@ public class JwtService {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = secretKey.getBytes();
-        return Keys.hmacShaKeyFor(keyBytes);
+        try {
+            byte[] keyBytes = Hex.decodeHex(secretKey.toCharArray());
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (DecoderException e) {
+            throw new RuntimeException("Invalid JWT secret key format. Must be 64 hex characters.", e);
+        }
     }
 } 
