@@ -45,6 +45,24 @@ public class BlogPostController {
                 .body(BlogPostDTO.fromEntity(createdPost));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<BlogPostDTO> updatePost(@PathVariable Long id, @RequestBody BlogPost blogPost) {
+        String username = getCurrentUsername();
+        try {
+            BlogPost updatedPost = blogPostService.updatePost(id, blogPost, username);
+            return ResponseEntity.ok(BlogPostDTO.fromEntity(updatedPost));
+        } catch (Exception e) {
+            if (e instanceof org.springframework.security.access.AccessDeniedException) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .build();
+            }
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
         String username = getCurrentUsername();

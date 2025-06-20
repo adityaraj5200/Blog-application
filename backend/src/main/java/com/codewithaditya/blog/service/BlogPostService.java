@@ -45,6 +45,21 @@ public class BlogPostService {
         blogPostRepository.deleteById(id);
     }
 
+    @Transactional
+    public BlogPost updatePost(Long id, BlogPost updatedPost, String username) {
+        BlogPost existingPost = blogPostRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        
+        if (!existingPost.getAuthor().getUsername().equals(username)) {
+            throw new AccessDeniedException("You can only update your own posts");
+        }
+        
+        existingPost.setTitle(updatedPost.getTitle());
+        existingPost.setContent(updatedPost.getContent());
+        
+        return blogPostRepository.save(existingPost);
+    }
+
     public boolean isPostAuthor(Long postId, String username) {
         return blogPostRepository.findById(postId)
                 .map(post -> post.getAuthor().getUsername().equals(username))

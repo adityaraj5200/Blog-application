@@ -21,3 +21,13 @@ export const createPost = async (postData) => {
     throw error;
   }
 };
+
+export const updatePost = async (id, postData) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}`, postData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating post:', error);
+    throw error;
+  }
+};
