@@ -30,8 +30,10 @@ const CreatePost = () => {
     const loadPost = async () => {
         try {
             setIsLoading(true);
+            console.log('Loading post with ID:', id);
             const response = await api.get(`/posts/${id}`);
             const post = response.data;
+            console.log('Loaded post data:', post);
             setTitle(post.title);
             setContent(post.content);
         } catch (error) {
@@ -49,20 +51,28 @@ const CreatePost = () => {
             return;
         }
 
+        console.log('Submit called. isEditMode:', isEditMode, 'id:', id);
+        console.log('Form data - title:', title, 'content:', content);
+
         try {
             setIsLoading(true);
             if (isEditMode) {
                 // Update existing post
-                await api.put(`/posts/${id}`, { title, content });
+                console.log('Attempting to update post with ID:', id);
+                const response = await api.put(`/posts/${id}`, { title, content });
+                console.log('Update response:', response.data);
                 console.log('Post updated successfully');
             } else {
                 // Create new post
-                await api.post('/posts', { title, content });
+                console.log('Attempting to create new post');
+                const response = await api.post('/posts', { title, content });
+                console.log('Create response:', response.data);
                 console.log('Post created successfully');
             }
             navigate('/');
         } catch (error) {
             console.error('Error saving post:', error);
+            console.error('Error response:', error.response);
             if (error.response?.status === 403) {
                 setError('Your session may have expired. Please try logging in again.');
             } else {
