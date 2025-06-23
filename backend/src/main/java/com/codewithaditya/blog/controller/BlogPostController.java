@@ -4,6 +4,8 @@ import com.codewithaditya.blog.dto.BlogPostDTO;
 import com.codewithaditya.blog.model.BlogPost;
 import com.codewithaditya.blog.service.BlogPostService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class BlogPostController {
+    private static final Logger logger = LoggerFactory.getLogger(BlogPostController.class);
     private final BlogPostService blogPostService;
 
     @GetMapping
@@ -48,10 +51,13 @@ public class BlogPostController {
     @PutMapping("/{id}")
     public ResponseEntity<BlogPostDTO> updatePost(@PathVariable Long id, @RequestBody BlogPost blogPost) {
         String username = getCurrentUsername();
+        logger.info("Received update request for post id {}: title={}, content={}, bodyId={}", id, blogPost.getTitle(), blogPost.getContent(), blogPost.getId());
         try {
             BlogPost updatedPost = blogPostService.updatePost(id, blogPost, username);
+            logger.info("Updated post: id={}, title={}, content={}", updatedPost.getId(), updatedPost.getTitle(), updatedPost.getContent());
             return ResponseEntity.ok(BlogPostDTO.fromEntity(updatedPost));
         } catch (Exception e) {
+            logger.error("Error updating post: {}", e.getMessage(), e);
             if (e instanceof org.springframework.security.access.AccessDeniedException) {
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
