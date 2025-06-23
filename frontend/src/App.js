@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import CreatePost from './pages/CreatePost';
+import EditPost from './pages/EditPost';
 import PostDetail from './pages/PostDetail';
 import MyBlogs from './pages/MyBlogs';
 
@@ -68,7 +69,7 @@ function AppRoutes() {
                 } />
                 <Route path="/edit/:id" element={
                     <ProtectedRoute>
-                        <CreatePost />
+                        <EditPost />
                     </ProtectedRoute>
                 } />
             </Routes>
