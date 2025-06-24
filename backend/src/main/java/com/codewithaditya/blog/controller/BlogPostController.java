@@ -42,6 +42,13 @@ public class BlogPostController {
     @PostMapping
     public ResponseEntity<BlogPostDTO> createPost(@RequestBody BlogPost blogPost) {
         String username = getCurrentUsername();
+        logger.info("=== CREATE POST REQUEST ===");
+        logger.info("Creating new post - title: {}, content length: {}", 
+                   blogPost.getTitle(), 
+                   blogPost.getContent() != null ? blogPost.getContent().length() : 0);
+        logger.info("Current user: {}", username);
+        logger.info("===========================");
+        
         BlogPost createdPost = blogPostService.createPost(blogPost, username);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -51,13 +58,26 @@ public class BlogPostController {
     @PutMapping("/{id}")
     public ResponseEntity<BlogPostDTO> updatePost(@PathVariable Long id, @RequestBody BlogPost blogPost) {
         String username = getCurrentUsername();
-        logger.info("Received update request for post id {}: title={}, content={}, bodyId={}", id, blogPost.getTitle(), blogPost.getContent(), blogPost.getId());
+        logger.info("=== UPDATE POST REQUEST DEBUG ===");
+        logger.info("Path variable id: {}", id);
+        logger.info("Request body - id: {}, title: {}, content: {}", 
+                   blogPost.getId(), blogPost.getTitle(), blogPost.getContent());
+        logger.info("Request body author: {}", blogPost.getAuthor());
+        logger.info("Current user: {}", username);
+        logger.info("================================");
+        
         try {
             BlogPost updatedPost = blogPostService.updatePost(id, blogPost, username);
-            logger.info("Updated post: id={}, title={}, content={}", updatedPost.getId(), updatedPost.getTitle(), updatedPost.getContent());
+            logger.info("=== UPDATE POST SUCCESS ===");
+            logger.info("Updated post - id: {}, title: {}, content: {}", 
+                       updatedPost.getId(), updatedPost.getTitle(), updatedPost.getContent());
+            logger.info("Updated post author: {}", updatedPost.getAuthor() != null ? updatedPost.getAuthor().getUsername() : "null");
+            logger.info("==========================");
             return ResponseEntity.ok(BlogPostDTO.fromEntity(updatedPost));
         } catch (Exception e) {
+            logger.error("=== UPDATE POST ERROR ===");
             logger.error("Error updating post: {}", e.getMessage(), e);
+            logger.error("=========================");
             if (e instanceof org.springframework.security.access.AccessDeniedException) {
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
