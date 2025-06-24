@@ -43,7 +43,7 @@ const EditPost = () => {
         }
         try {
             setIsLoading(true);
-            await api.put(`/posts/${id}`, { title, content });
+            await api.put(`/posts/${id}`, { id, title, content });
             navigate('/');
         } catch (error) {
             setError(error.response?.data?.message || 'Error updating post');

@@ -59,7 +59,7 @@ const CreatePost = () => {
             if (isEditMode) {
                 // Update existing post
                 console.log('Attempting to update post with ID:', id);
-                const response = await api.put(`/posts/${id}`, { title, content });
+                const response = await api.put(`/posts/${id}`, { id, title, content });
                 console.log('Update response:', response.data);
                 console.log('Post updated successfully');
             } else {
